@@ -9,7 +9,7 @@ UDP_PORT = 5005
 #file info
 CHUNK_SIZE = 100
 WINDOW_SIZE = 5
-SEND_FILE = "myfile.txt" #file name which going to send
+SEND_FILE = "H.jpg" #file name which going to send
 
 #ACKS
 ACKPOSITIVE = "1"
@@ -50,17 +50,15 @@ sock.bind((UDP_IP, UDP_PORT))
 # resiver
 sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-
-
-
 data_to_send = datahandle.get_data(SEND_FILE)#get data array
 firstdata = datahandle.get_file_info(SEND_FILE, CHUNK_SIZE) + " " + str(WINDOW_SIZE)#first information
 
 sendACK(firstdata)#check the connection of the server and send send data about the file
 
+file_size = len(data_to_send)#get the size of the file from bytes
+WAIT() #wait till the resiver ready to get data
+
 def transfer(arg):
-    file_size = len(data_to_send)#get the size of the file from bytes
-    WAIT() #wait till the resiver ready to get data
     packet = {} #data packet
     windowframe = 0 #window frame number
     i =0 #chunk increasere
@@ -72,14 +70,14 @@ def transfer(arg):
                 print("Negative ack resive")
                 i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
             else:
-                #print("positive ack resive")
+                print("positive ack resive")
                 k = ACKPOSITIVE
         data_part = data_to_send[i:i+CHUNK_SIZE]
         i += CHUNK_SIZE
         packet={windowframe:{data_part.__hash__():data_part}} #add data and metadata to dictionary
         send_packet = pickle.dumps(packet) #make one packet
         sock2.sendto(send_packet,(UDP_IP, 5000)) #send data
-        #print("frame " + str(windowframe) + " send")
+        print("frame " + str(windowframe) + " send")
         windowframe +=1
 
 #transfer()
@@ -89,8 +87,8 @@ def transfer(arg):
 if __name__ == "__main__":
     trns = Thread(target = transfer, args = ("pop", ))
     trns.start()
-    listener = Thread(target = ack_listener, args = ("pop", ))
-    listener.start()
+    ##listener = Thread(target = ack_listener, args = ("pop", ))
+    #listener.start()
 
 #------------------------------------------------------------------
 
