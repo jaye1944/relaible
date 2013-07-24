@@ -6,10 +6,11 @@ from threading import Thread
 #server data
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5005
+CLIENT_PORT = 5000
 #file info
 CHUNK_SIZE = 100
 WINDOW_SIZE = 5
-SEND_FILE = "H.jpg" #file name which going to send
+SEND_FILE = "myfile.txt" #file name which going to send
 
 #ACKS
 ACKPOSITIVE = "1"
@@ -22,7 +23,7 @@ def sendACK(first_data):
     while True:
         data, addr = sock.recvfrom(100) # buffer size is 1024 bytes
         if (data.decode('utf-8') == ACKPOSITIVE):
-            sock2.sendto(first_data.encode('utf-8'), (UDP_IP, 5000))
+            sock2.sendto(first_data.encode('utf-8'), (UDP_IP, CLIENT_PORT))
             break
 
 def WAIT():
@@ -59,7 +60,6 @@ file_size = len(data_to_send)#get the size of the file from bytes
 WAIT() #wait till the resiver ready to get data
 
 def transfer(arg):
-    packet = {} #data packet
     windowframe = 0 #window frame number
     i =0 #chunk increasere
     while True:
@@ -70,13 +70,17 @@ def transfer(arg):
                 print("Negative ack resive")
                 i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
             else:
-                print("positive ack resive")
+                print("Positive ack resive")
                 k = ACKPOSITIVE
         data_part = data_to_send[i:i+CHUNK_SIZE]
         i += CHUNK_SIZE
-        packet={windowframe:{data_part.__hash__():data_part}} #add data and metadata to dictionary
+        packet={windowframe:{data_part.__hash__():data_part}} #add data and metadata to dictionary hash value of data
         send_packet = pickle.dumps(packet) #make one packet
-        sock2.sendto(send_packet,(UDP_IP, 5000)) #send data
+        try:
+            sock2.sendto(send_packet,(UDP_IP, CLIENT_PORT)) #send data
+        except Exception:
+            print("Connection error")
+            break
         print("frame " + str(windowframe) + " send")
         windowframe +=1
 

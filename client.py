@@ -6,20 +6,20 @@ import resive_data
 
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5000
-
+SERVER_PORT = 5005
 #ACKS
 ACKPOSITIVE = "1"
 
 def FirstACK():
     while True:
-        sock.sendto(ACKPOSITIVE.encode('utf-8'), (UDP_IP, 5005))
+        sock.sendto(ACKPOSITIVE.encode('utf-8'), (UDP_IP, SERVER_PORT))
         data, addr = sock2.recvfrom(100)
         return data
         break
 
 def window_Ack(infor):
     while True:
-        sock.sendto(infor.encode('utf-8'),(UDP_IP, 5005))
+        sock.sendto(infor.encode('utf-8'),(UDP_IP, SERVER_PORT))
         #data, addr = sock2.recvfrom(100)
         #return data
         break
@@ -53,7 +53,7 @@ actual_errors = 0 #how many error packets resived
 error_free = 0 # how many error free packets resived
 
 #send ack for ready
-sock.sendto(ACKPOSITIVE.encode('utf-8'), (UDP_IP, 5005))
+sock.sendto(ACKPOSITIVE.encode('utf-8'), (UDP_IP, SERVER_PORT))
 start = time.time()
 
 while True:
