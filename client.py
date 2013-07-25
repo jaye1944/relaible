@@ -48,6 +48,8 @@ pac_in_window = 0 #number in window pac
 window_count = 0 #which window
 global lock      #use to lock the errorless list from error list
 lock = True
+
+global original_file
 original_file =[] #data array
 actual_errors = 0 #how many error packets resived
 error_free = 0 # how many error free packets resived
@@ -65,6 +67,7 @@ while True:
         if(lock):# can add data to array
             count_packets +=1
             original_file.append(resive_data.datapart(get_packet))
+            #print("Length " +str(len(original_file)))
             if(count_packets == int(alldata[1])):#comaire error free packets with how many actual packets
                 end = time.time()# now file transfer is over
                 resive_data.print_All(str(end - start),actual_errors,error_free)#print results
