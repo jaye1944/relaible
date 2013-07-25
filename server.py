@@ -28,13 +28,13 @@ def sendACK(first_data):
 
 def WAIT():
     while True:
-        data, addr = sock.recvfrom(100) # buffer size is 1024 bytes
+        data, addr = sock.recvfrom(100) # buffer size is 100bytes
         if (data.decode('utf-8') == ACKPOSITIVE):
             break
 
 def Window_Ack():
     while True:
-        data, addr = sock.recvfrom(100) # buffer size is 1024 bytes
+        data, addr = sock.recvfrom(100) # buffer size is 100 bytes
         return data.decode('utf-8')
         break
 #------------------------------------------------------
@@ -67,10 +67,15 @@ def transfer(arg):
             windowframe = 0
             k = Window_Ack()
             if(k!= ACKPOSITIVE):
+               # ----whilw trur for
                 print("Negative ack resive")
+                print(k)
+                print(i)
                 i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
+                print(i)
+               # ------
             else:
-                print("Positive ack resive")
+                #print("Positive ack resive")
                 k = ACKPOSITIVE
         data_part = data_to_send[i:i+CHUNK_SIZE]
         i += CHUNK_SIZE
@@ -81,7 +86,7 @@ def transfer(arg):
         except Exception:
             print("Connection error")
             break
-        print("frame " + str(windowframe) + " send")
+        #print("frame " + str(windowframe) + " send")
         windowframe +=1
 
 #transfer()

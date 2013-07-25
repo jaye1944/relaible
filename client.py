@@ -68,7 +68,7 @@ while True:
             count_packets +=1
             original_file.append(resive_data.datapart(get_packet))
             #print("Length " +str(len(original_file)))
-            if(count_packets == int(alldata[1])):#comaire error free packets with how many actual packets
+            if(len(original_file) == int(alldata[1])):#comaire error free packets with how many actual packets
                 end = time.time()# now file transfer is over
                 resive_data.print_All(str(end - start),actual_errors,error_free)#print results
                 resive_data.writer(original_file)#create a file
