@@ -10,7 +10,7 @@ CLIENT_PORT = 5000
 #file info
 CHUNK_SIZE = 100
 WINDOW_SIZE = 5
-SEND_FILE = "myfile.txt" #file name which going to send
+SEND_FILE = "tt" #file name which going to send
 
 #ACKS
 ACKPOSITIVE = "1"
@@ -43,7 +43,7 @@ def ack_listener(arg):
 
 #--------------------------------------------------------------
 
-def transfer(arg):
+def transfer():
     windowframe = 0 #window frame number
     i =0 #chunk increasere
     while True:
@@ -91,6 +91,6 @@ sendACK(firstdata)#check the connection of the server and send send data about t
 file_size = len(data_to_send)#get the size of the file from bytes
 WAIT() #wait till the resiver ready to get data
 
-transfer("pp")
+transfer()
 
 
