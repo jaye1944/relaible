@@ -3,7 +3,7 @@ global ffname
 global sq
 
 global error_ratio
-error_ratio = 0.0
+error_ratio = 0.3
 
 
 def error_or_not():
@@ -17,8 +17,8 @@ def error(dict,seqnumber):    #simple error checking
         for p,q in j.items():
             if( p == q.__hash__() and (seqnumber == i)):#check error using hash value and fram
                # simulation error using uniform distributuion
-                #if(error_or_not()):
-                  # return False
+                if(error_or_not()):
+                   return False
                 return True
     return False
 

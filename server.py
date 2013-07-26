@@ -10,7 +10,7 @@ CLIENT_PORT = 5000
 #file info
 CHUNK_SIZE = 100
 WINDOW_SIZE = 5
-SEND_FILE = "tt" #file name which going to send
+SEND_FILE = "myfile.txt" #file name which going to send
 
 #ACKS
 ACKPOSITIVE = "1"
@@ -32,7 +32,7 @@ def WAIT():
 def Window_Ack():
     while True:
         data, addr = sock.recvfrom(100) # buffer size is 100 bytes
-        return data.decode('utf-8')
+        return pickle.loads(data)
         break
 #------------------------------------------------------
 def ack_listener(arg):
@@ -46,31 +46,32 @@ def ack_listener(arg):
 def transfer():
     windowframe = 0 #window frame number
     i =0 #chunk increasere
+    NO_OF_CHUNKS = datahandle.no_of_chun(SEND_FILE, CHUNK_SIZE)
+    temp_store = []
     while True:
         if(windowframe == WINDOW_SIZE ):
             windowframe = 0
             k = Window_Ack()
-            if(k!= ACKPOSITIVE):
-               # ----whilw trur for
+            if(len(k)!= 0):
                 print("Negative ack resive")
-               # print(k)
-               # print(i)
-                i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
-               # print(i)
-               # ------
+                #i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
+                print(k)
+                temp_store = []
             else:
                 print("Positive ack resive")
+                temp_store = []
                 #k = ACKPOSITIVE
         data_part = data_to_send[i:i+CHUNK_SIZE]
         i += CHUNK_SIZE
         packet={windowframe:{data_part.__hash__():data_part}} #add data and metadata to dictionary hash value of data
         send_packet = pickle.dumps(packet) #make one packet
+        temp_store.append(send_packet)
         try:
             sock2.sendto(send_packet,(UDP_IP, CLIENT_PORT)) #send data
         except Exception:
             print("Connection error")
             break
-        print("frame " + str(windowframe) + " send")
+        #print("frame " + str(windowframe) + " send")
         windowframe +=1
 
 print("Server IP " + UDP_IP +" Srever port "+ str(UDP_PORT))
@@ -87,8 +88,8 @@ data_to_send = datahandle.get_data(SEND_FILE)#get data array
 firstdata = datahandle.get_file_info(SEND_FILE, CHUNK_SIZE) + " " + str(WINDOW_SIZE)#first information
 
 sendACK(firstdata)#check the connection of the server and send send data about the file
-
-file_size = len(data_to_send)#get the size of the file from bytes
+print(datahandle.no_of_chun(SEND_FILE, CHUNK_SIZE))
+#file_size = len(data_to_send)#get the size of the file from bytes
 WAIT() #wait till the resiver ready to get data
 
 transfer()
