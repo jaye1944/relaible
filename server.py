@@ -15,10 +15,7 @@ SEND_FILE = "myfile.txt" #file name which going to send
 #ACKS
 ACKPOSITIVE = "1"
 
-print("Server IP " + UDP_IP +" Srever port "+ str(UDP_PORT))
-print("Window size is "+ str(WINDOW_SIZE))
-print("Chunk size is "+ str(CHUNK_SIZE))
-print("Ready to connect......")
+
 def sendACK(first_data):
     while True:
         data, addr = sock.recvfrom(100) # buffer size is 1024 bytes
@@ -45,19 +42,6 @@ def ack_listener(arg):
         break
 
 #--------------------------------------------------------------
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-sock.bind((UDP_IP, UDP_PORT))
-# resiver
-sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-data_to_send = datahandle.get_data(SEND_FILE)#get data array
-firstdata = datahandle.get_file_info(SEND_FILE, CHUNK_SIZE) + " " + str(WINDOW_SIZE)#first information
-
-sendACK(firstdata)#check the connection of the server and send send data about the file
-
-file_size = len(data_to_send)#get the size of the file from bytes
-WAIT() #wait till the resiver ready to get data
 
 def transfer(arg):
     windowframe = 0 #window frame number
@@ -89,17 +73,24 @@ def transfer(arg):
         print("frame " + str(windowframe) + " send")
         windowframe +=1
 
+print("Server IP " + UDP_IP +" Srever port "+ str(UDP_PORT))
+print("Window size is "+ str(WINDOW_SIZE))
+print("Chunk size is "+ str(CHUNK_SIZE))
+print("Ready to connect......")
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+sock.bind((UDP_IP, UDP_PORT))
+# resiver
+sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+data_to_send = datahandle.get_data(SEND_FILE)#get data array
+firstdata = datahandle.get_file_info(SEND_FILE, CHUNK_SIZE) + " " + str(WINDOW_SIZE)#first information
+
+sendACK(firstdata)#check the connection of the server and send send data about the file
+
+file_size = len(data_to_send)#get the size of the file from bytes
+WAIT() #wait till the resiver ready to get data
+
 transfer("pp")
 
-#--------------------------------------------------------------------
-#create listen thread....
-#if __name__ == "__main__":
-    #trns = Thread(target = transfer, args = ("pop", ))
-    #trns.start()
-    ##listener = Thread(target = ack_listener, args = ("pop", ))
-    #listener.start()
-
-#------------------------------------------------------------------
-
-#listener.start()
 

@@ -23,15 +23,6 @@ def window_Ack(infor):
         #data, addr = sock2.recvfrom(100)
         #return data
         break
-
-print("UDP target IP: " + UDP_IP)
-print("UDP target port: " + str(UDP_PORT))
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-
-sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-sock2.bind((UDP_IP, UDP_PORT))
-
 #ready to get data
 #print(FirstACK())
 def start():
@@ -88,5 +79,14 @@ def start():
                 error_list = [] #free the list
                 lock = True
             pac_in_window = 0
+
+
+print("UDP target IP: " + UDP_IP)
+print("UDP target port: " + str(UDP_PORT))
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+
+sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+sock2.bind((UDP_IP, UDP_PORT))
 
 start()
