@@ -1,7 +1,7 @@
 import socket
 import datahandle
 import pickle
-from threading import Thread
+#from threading import Thread
 
 #server data
 UDP_IP = "127.0.0.1"
@@ -69,14 +69,14 @@ def transfer(arg):
             if(k!= ACKPOSITIVE):
                # ----whilw trur for
                 print("Negative ack resive")
-                print(k)
-                print(i)
+               # print(k)
+               # print(i)
                 i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
-                print(i)
+               # print(i)
                # ------
             else:
-                #print("Positive ack resive")
-                k = ACKPOSITIVE
+                print("Positive ack resive")
+                #k = ACKPOSITIVE
         data_part = data_to_send[i:i+CHUNK_SIZE]
         i += CHUNK_SIZE
         packet={windowframe:{data_part.__hash__():data_part}} #add data and metadata to dictionary hash value of data
@@ -86,16 +86,16 @@ def transfer(arg):
         except Exception:
             print("Connection error")
             break
-        #print("frame " + str(windowframe) + " send")
+        print("frame " + str(windowframe) + " send")
         windowframe +=1
 
-#transfer()
+transfer("pp")
 
 #--------------------------------------------------------------------
 #create listen thread....
-if __name__ == "__main__":
-    trns = Thread(target = transfer, args = ("pop", ))
-    trns.start()
+#if __name__ == "__main__":
+    #trns = Thread(target = transfer, args = ("pop", ))
+    #trns.start()
     ##listener = Thread(target = ack_listener, args = ("pop", ))
     #listener.start()
 
