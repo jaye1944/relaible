@@ -3,7 +3,7 @@ global ffname
 global sq
 
 global error_ratio
-error_ratio = 0.3
+error_ratio = 0.000
 
 
 def error_or_not():
@@ -34,7 +34,7 @@ def datapart(dict):
         for p,q in j.items():
             return q
 
-def window_number(dict):
+def pac_number(dict):
     for i,j in dict.items():
         return i
 

@@ -24,6 +24,11 @@ def window_Ack(infor):
         #return data
         break
 
+def collector(temp,original):
+    for i in range(0,len(temp)):
+        original.append(temp[i])
+
+
 def list_ack(lst):
     while True:
         sock.sendto(pickle.dumps(lst),(UDP_IP, SERVER_PORT))
@@ -65,31 +70,29 @@ def start():
         pac_in_window +=1
         if resive_data.error(get_packet,pac_in_window-1):#check the errors
             error_free += 1
-            temp_store[resive_data.window_number(get_packet)] = resive_data.datapart(get_packet)
-            #print(temp_store)
-            if not None in temp_store:
-                for i in range(0,len(temp_store)):
-                    original_file.append(temp_store[i])
+            temp_store[resive_data.pac_number(get_packet)] = resive_data.datapart(get_packet)
+        else:
+            actual_errors +=1
+            error_pac_num_list.append(resive_data.pac_number(get_packet))
+        if(pac_in_window == len(temp_store)):#check window size
+            window_count +=1
+            list_ack(error_pac_num_list)
+            if not None in temp_store:#all packets are ok
+                collector(temp_store,original_file) #add data
+                if(len(original_file) == NUM_OF_CHUNKS):#comaire error free packets with how many actual packets
+                    end = time.time()# now file transfer is over
+                    resive_data.print_All(str(end - start),actual_errors,error_free)#print results
+                    resive_data.writer(original_file)#create a file
+                    break
                 if NUM_OF_CHUNKS - len(original_file) >= WINDOW_SIZE:
                     temp_store = [None]*WINDOW_SIZE
                 else:
                     temp_store = [None]*(NUM_OF_CHUNKS%WINDOW_SIZE)
-            if(len(original_file) == NUM_OF_CHUNKS):#comaire error free packets with how many actual packets
-                end = time.time()# now file transfer is over
-                resive_data.print_All(str(end - start),actual_errors,error_free)#print results
-                resive_data.writer(original_file)#create a file
-                break
-        else:
-            actual_errors +=1
-            error_pac_num_list.append(resive_data.window_number(get_packet))
-        if(pac_in_window == WINDOW_SIZE):#check window size
-            window_count +=1
-            list_ack(error_pac_num_list)
-            if len(error_pac_num_list) == 0:
-                print("good")
                  # + Ack
-            else:
+            else:#some pacs lost
                 print("bad")
+                print(temp_store)
+                #o
                 #list_ack(error_pac_num_list)
             error_pac_num_list = []
             pac_in_window = 0
