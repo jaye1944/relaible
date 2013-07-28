@@ -9,6 +9,7 @@ UDP_PORT = 5000
 SERVER_PORT = 5005
 #ACKS
 ACKPOSITIVE = "1"
+ACKNEGATIVE = "0"
 
 def FirstACK():
     while True:
@@ -27,12 +28,41 @@ def window_Ack(infor):
 def collector(temp,original):
     for i in range(0,len(temp)):
         original.append(temp[i])
+    temp = []
 
 
 def list_ack(lst):
     while True:
         sock.sendto(pickle.dumps(lst),(UDP_IP, SERVER_PORT))
         break
+
+def list_maker(ori_file,no_c,w_c):
+    if no_c - len(ori_file) >= w_c:
+        temp_store = [None]*w_c
+    else:
+        temp_store = [None]*(no_c%w_c)
+    return temp_store
+
+def re_resiver(t_store,w_size,errr):
+    while True:
+        data, addr = sock2.recvfrom(2048)
+        get_packet = pickle.loads(data)
+        if resive_data.error_two(get_packet):
+            print("Error pac num list is "+ str(len(errr)))
+            print("len is "+ str(len(t_store)))
+            print(resive_data.pac_number(get_packet))
+            print(t_store)
+            for i in range(0,len(t_store)):
+                if t_store[i]== None:
+                    t_store[i] = resive_data.datapart(get_packet)
+                    break
+            window_Ack(ACKPOSITIVE)
+        else:
+            window_Ack(ACKNEGATIVE)
+            print("negative")
+        if not None in t_store:
+            break
+
 
 #ready to get data
 #print(FirstACK())
@@ -84,14 +114,14 @@ def start():
                     resive_data.print_All(str(end - start),actual_errors,error_free)#print results
                     resive_data.writer(original_file)#create a file
                     break
-                if NUM_OF_CHUNKS - len(original_file) >= WINDOW_SIZE:
-                    temp_store = [None]*WINDOW_SIZE
-                else:
-                    temp_store = [None]*(NUM_OF_CHUNKS%WINDOW_SIZE)
+                temp_store = list_maker(original_file,NUM_OF_CHUNKS,WINDOW_SIZE)
                  # + Ack
             else:#some pacs lost
                 print("bad")
-                print(temp_store)
+                #print(temp_store)
+                re_resiver(temp_store,WINDOW_SIZE,error_pac_num_list)
+                collector(temp_store,original_file)
+                temp_store = list_maker(original_file,NUM_OF_CHUNKS,WINDOW_SIZE)
                 #o
                 #list_ack(error_pac_num_list)
             error_pac_num_list = []

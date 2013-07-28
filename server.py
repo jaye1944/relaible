@@ -35,13 +35,29 @@ def Window_Ack():
         return pickle.loads(data)
         break
 #------------------------------------------------------
-def ack_listener(arg):
+def ack_listener():
     while True:
         data, addr = sock.recvfrom(100)
+        print("from method")
         print(data.decode('utf-8'))
+        return data.decode('utf-8')
         break
 
 #--------------------------------------------------------------
+def resender(t_store,error_list):
+    for i in range(0,len(error_list)):
+        #print(t_store[error_list[i]])
+        print(error_list)
+        de_data = "0"
+        while de_data != ACKPOSITIVE:
+            #print(de_data)
+            sock2.sendto(t_store[error_list[i]],(UDP_IP, CLIENT_PORT))
+            #print("data send")
+            de_data = ack_listener()
+            print(de_data)
+
+
+
 
 def transfer():
     windowframe = 0 #window frame number
@@ -55,7 +71,7 @@ def transfer():
             if(len(k)!= 0):
                 print("Negative ack resive")
                 #i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
-                print(k)
+                resender(temp_store,k)
                 temp_store = []
             else:
                 print("Positive ack resive")
