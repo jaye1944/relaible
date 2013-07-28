@@ -8,8 +8,8 @@ UDP_IP = "127.0.0.1"
 UDP_PORT = 5000
 SERVER_PORT = 5005
 #ACKS
-ACKPOSITIVE = "1"
-ACKNEGATIVE = "0"
+ACKPOSITIVE = "P"
+ACKNEGATIVE = "N"
 
 def FirstACK():
     while True:
@@ -32,9 +32,14 @@ def collector(temp,original):
 
 
 def list_ack(lst):
-    while True:
-        sock.sendto(pickle.dumps(lst),(UDP_IP, SERVER_PORT))
-        break
+    if len(lst)== 0:
+        window_Ack(ACKPOSITIVE)
+    else:
+        rr = ""
+        for i in range(0,len(lst)):
+            rr += str(lst[i])
+            rr += " "
+        window_Ack(rr)
 
 def list_maker(ori_file,no_c,w_c):
     if no_c - len(ori_file) >= w_c:
@@ -50,16 +55,16 @@ def re_resiver(t_store,w_size,errr):
         if resive_data.error_two(get_packet):
             print("Error pac num list is "+ str(len(errr)))
             print("len is "+ str(len(t_store)))
-            print(resive_data.pac_number(get_packet))
             print(t_store)
             for i in range(0,len(t_store)):
                 if t_store[i]== None:
                     t_store[i] = resive_data.datapart(get_packet)
                     break
             window_Ack(ACKPOSITIVE)
+            #print("method ack snd")
         else:
             window_Ack(ACKNEGATIVE)
-            print("negative")
+            #print("negative")
         if not None in t_store:
             break
 
@@ -122,8 +127,6 @@ def start():
                 re_resiver(temp_store,WINDOW_SIZE,error_pac_num_list)
                 collector(temp_store,original_file)
                 temp_store = list_maker(original_file,NUM_OF_CHUNKS,WINDOW_SIZE)
-                #o
-                #list_ack(error_pac_num_list)
             error_pac_num_list = []
             pac_in_window = 0
 

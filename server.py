@@ -13,7 +13,7 @@ WINDOW_SIZE = 5
 SEND_FILE = "myfile.txt" #file name which going to send
 
 #ACKS
-ACKPOSITIVE = "1"
+ACKPOSITIVE = "P"
 
 
 def sendACK(first_data):
@@ -30,18 +30,17 @@ def WAIT():
             break
 
 def Window_Ack():
-    while True:
-        data, addr = sock.recvfrom(100) # buffer size is 100 bytes
-        return pickle.loads(data)
-        break
+    #data = []
+    #while data != None:
+    data, addr = sock.recvfrom(500)  # buffer size is 100 bytes
+        #rrr =
+    return pickle.loads(data)
+
 #------------------------------------------------------
 def ack_listener():
-    while True:
-        data, addr = sock.recvfrom(100)
-        print("from method")
-        print(data.decode('utf-8'))
-        return data.decode('utf-8')
-        break
+    data, addr = sock.recvfrom(100)
+    return data.decode('utf-8')
+
 
 #--------------------------------------------------------------
 def resender(t_store,error_list):
@@ -50,13 +49,16 @@ def resender(t_store,error_list):
         print(error_list)
         de_data = "0"
         while de_data != ACKPOSITIVE:
-            #print(de_data)
             sock2.sendto(t_store[error_list[i]],(UDP_IP, CLIENT_PORT))
-            #print("data send")
             de_data = ack_listener()
             print(de_data)
 
-
+def lst_maker(stri):
+    str_li = stri.split(" ")
+    int_li = []
+    for i in range(0,len(str_li)-1):
+        int_li.append(int(str_li[i]))
+    return int_li
 
 
 def transfer():
@@ -67,7 +69,8 @@ def transfer():
     while True:
         if(windowframe == WINDOW_SIZE ):
             windowframe = 0
-            k = Window_Ack()
+            k = lst_maker(ack_listener())
+            print(k)
             if(len(k)!= 0):
                 print("Negative ack resive")
                 #i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
