@@ -49,13 +49,15 @@ def list_maker(ori_file,no_c,w_c):
     return temp_store
 
 def re_resiver(t_store,w_size,errr):
+    print("************************")
+    print("Error pac num list is "+ str(len(errr)))
+    print("len is "+ str(len(t_store)))
+    print(t_store)
+    print(errr)
     while True:
         data, addr = sock2.recvfrom(2048)
         get_packet = pickle.loads(data)
         if resive_data.error_two(get_packet):
-            print("Error pac num list is "+ str(len(errr)))
-            print("len is "+ str(len(t_store)))
-            print(t_store)
             for i in range(0,len(t_store)):
                 if t_store[i]== None:
                     t_store[i] = resive_data.datapart(get_packet)
@@ -66,6 +68,7 @@ def re_resiver(t_store,w_size,errr):
             window_Ack(ACKNEGATIVE)
             #print("negative")
         if not None in t_store:
+            print(t_store)
             break
 
 
