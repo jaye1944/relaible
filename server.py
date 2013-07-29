@@ -10,7 +10,7 @@ CLIENT_PORT = 5000
 #file info
 CHUNK_SIZE = 100
 WINDOW_SIZE = 5
-SEND_FILE = "myfile.txt" #file name which going to send
+SEND_FILE = "H.jpg" #file name which going to send
 
 #ACKS
 ACKPOSITIVE = "P"
@@ -46,12 +46,12 @@ def ack_listener():
 def resender(t_store,error_list):
     for i in range(0,len(error_list)):
         #print(t_store[error_list[i]])
-        print(error_list)
-        de_data = "0"
+        #print("T list  length is "+ str(len(t_store)))
+        de_data = "N"
         while de_data != ACKPOSITIVE:
             sock2.sendto(t_store[error_list[i]],(UDP_IP, CLIENT_PORT))
             de_data = ack_listener()
-            print(de_data)
+           # print(de_data)
 
 def lst_maker(stri):
     str_li = stri.split(" ")
@@ -72,14 +72,19 @@ def transfer():
             k = lst_maker(ack_listener())
             print(k)
             if(len(k)!= 0):
+                print("******")
                 print("Negative ack resive")
                 #i = i - ((int(k) + WINDOW_SIZE) * CHUNK_SIZE )#re arrange the window in data buffer
+                print(temp_store)
                 resender(temp_store,k)
                 temp_store = []
             else:
                 print("Positive ack resive")
                 temp_store = []
                 #k = ACKPOSITIVE
+        if i > CHUNK_SIZE*NO_OF_CHUNKS:
+            #print("Chunk chunk "+str(i))
+            i = i - CHUNK_SIZE
         data_part = data_to_send[i:i+CHUNK_SIZE]
         i += CHUNK_SIZE
         packet={windowframe:{data_part.__hash__():data_part}} #add data and metadata to dictionary hash value of data

@@ -21,13 +21,12 @@ def FirstACK():
 def window_Ack(infor):
     while True:
         sock.sendto(infor.encode('utf-8'),(UDP_IP, SERVER_PORT))
-        #data, addr = sock2.recvfrom(100)
-        #return data
         break
 
 def collector(temp,original):
     for i in range(0,len(temp)):
-        original.append(temp[i])
+        if temp[i] != b'':
+            original.append(temp[i])
     temp = []
 
 
@@ -48,31 +47,32 @@ def list_maker(ori_file,no_c,w_c):
         temp_store = [None]*(no_c%w_c)
     return temp_store
 
-def re_resiver(t_store,w_size,errr):
-    print("************************")
-    print("Error pac num list is "+ str(len(errr)))
-    print("len is "+ str(len(t_store)))
-    print(t_store)
-    print(errr)
+def re_resiver(t_store):
     while True:
         data, addr = sock2.recvfrom(2048)
         get_packet = pickle.loads(data)
-        if resive_data.error_two(get_packet):
+        dat = resive_data.datapart(get_packet)
+        if dat == b'':
+           window_Ack(ACKNEGATIVE)
+        elif resive_data.error_two(get_packet):
             for i in range(0,len(t_store)):
-                if t_store[i]== None:
-                    t_store[i] = resive_data.datapart(get_packet)
+                if t_store[i]== None :
+                    t_store[i] = dat
                     break
             window_Ack(ACKPOSITIVE)
-            #print("method ack snd")
         else:
             window_Ack(ACKNEGATIVE)
-            #print("negative")
         if not None in t_store:
-            print(t_store)
             break
 
+def stopper(start,ori_file,CH,actual_errors,error_free):
+    if(len(ori_file)==CH):
+        end = time.time()# now file transfer is over
+        resive_data.print_All(str(end - start),actual_errors,error_free)#print results
+        resive_data.writer(ori_file)#create a file
+        return True
+    return False
 
-#ready to get data
 #print(FirstACK())
 def start():
     alldata = FirstACK().decode('utf-8').split(" ")
@@ -117,18 +117,15 @@ def start():
             list_ack(error_pac_num_list)
             if not None in temp_store:#all packets are ok
                 collector(temp_store,original_file) #add data
-                if(len(original_file) == NUM_OF_CHUNKS):#comaire error free packets with how many actual packets
-                    end = time.time()# now file transfer is over
-                    resive_data.print_All(str(end - start),actual_errors,error_free)#print results
-                    resive_data.writer(original_file)#create a file
+                if(stopper(start,original_file,NUM_OF_CHUNKS,actual_errors,error_free)):#comaire error free packets with how many actual packets
                     break
                 temp_store = list_maker(original_file,NUM_OF_CHUNKS,WINDOW_SIZE)
                  # + Ack
             else:#some pacs lost
-                print("bad")
-                #print(temp_store)
-                re_resiver(temp_store,WINDOW_SIZE,error_pac_num_list)
+                re_resiver(temp_store)
                 collector(temp_store,original_file)
+                if(stopper(start,original_file,NUM_OF_CHUNKS,actual_errors,error_free)):#comaire error free packets with how many actual packets
+                    break
                 temp_store = list_maker(original_file,NUM_OF_CHUNKS,WINDOW_SIZE)
             error_pac_num_list = []
             pac_in_window = 0
