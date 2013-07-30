@@ -47,19 +47,26 @@ def list_maker(ori_file,no_c,w_c):
         temp_store = [None]*(no_c%w_c)
     return temp_store
 
-def re_resiver(t_store):
+def re_resiver(t_store,e_nums):
     while True:
+        #print(t_store)
+        #print(e_nums)
         data, addr = sock2.recvfrom(2048)
         get_packet = pickle.loads(data)
         dat = resive_data.datapart(get_packet)
         if dat == b'':
-           window_Ack(ACKNEGATIVE)
-        elif resive_data.error_two(get_packet):
+            window_Ack(ACKNEGATIVE)
+        elif resive_data.error_two(get_packet):#hash checking
             for i in range(0,len(t_store)):
-                if t_store[i]== None :
-                    t_store[i] = dat
-                    break
-            window_Ack(ACKPOSITIVE)
+                if (t_store[i]== None):# empty slot
+                    if (resive_data.pac_number(get_packet) == i):# window checking
+                        t_store[i] = dat
+                        window_Ack(ACKPOSITIVE)
+                        break
+                    else:
+                        window_Ack(ACKNEGATIVE)
+                        break
+            #window_Ack(ACKNEGATIVE)
         else:
             window_Ack(ACKNEGATIVE)
         if not None in t_store:
@@ -122,7 +129,7 @@ def start():
                 temp_store = list_maker(original_file,NUM_OF_CHUNKS,WINDOW_SIZE)
                  # + Ack
             else:#some pacs lost
-                re_resiver(temp_store)
+                re_resiver(temp_store,error_pac_num_list)
                 collector(temp_store,original_file)
                 if(stopper(start,original_file,NUM_OF_CHUNKS,actual_errors,error_free)):#comaire error free packets with how many actual packets
                     break

@@ -3,7 +3,7 @@ global ffname
 global sq
 
 global error_ratio
-error_ratio = 0.4
+error_ratio = 0.5
 
 def error_or_not():
     ra = random.randrange(0,int(sq))
@@ -24,14 +24,12 @@ def error(dict,seqnumber):    #simple error checking
 def error_two(dict):
     for i,j in dict.items():
         for p,q in j.items():
-            if p == q.__hash__():#check error using hash value and fram
+            if p == q.__hash__():#check error using hash value
                # simulation error using uniform distributuion
-                #if(error_or_not()):
-                   #return False
+                if(error_or_not()):
+                   return False
                 return True
     return False
-
-
 
 def writer(or_file):
     f = open(ffname, 'wb')
