@@ -11,6 +11,7 @@ SERVER_PORT = 5005
 ACKPOSITIVE = "P"
 ACKNEGATIVE = "N"
 
+
 def FirstACK():
     while True:
         sock.sendto(ACKPOSITIVE.encode('utf-8'), (UDP_IP, SERVER_PORT))
@@ -47,10 +48,10 @@ def list_maker(ori_file,no_c,w_c):
         temp_store = [None]*(no_c%w_c)
     return temp_store
 
-def re_resiver(t_store,e_nums):
+def re_resiver(t_store):
+    global second_errors
+    global not_sec_errors
     while True:
-        #print(t_store)
-        #print(e_nums)
         data, addr = sock2.recvfrom(2048)
         get_packet = pickle.loads(data)
         dat = resive_data.datapart(get_packet)
@@ -61,19 +62,23 @@ def re_resiver(t_store,e_nums):
                 if (t_store[i]== None):# empty slot
                     if (resive_data.pac_number(get_packet) == i):# window checking
                         t_store[i] = dat
+                        not_sec_errors +=1
                         window_Ack(ACKPOSITIVE)
                         break
                     else:
+                        second_errors +=1
                         window_Ack(ACKNEGATIVE)
                         break
             #window_Ack(ACKNEGATIVE)
         else:
+            second_errors +=1
             window_Ack(ACKNEGATIVE)
         if not None in t_store:
             break
 
-def stopper(start,ori_file,CH,actual_errors,error_free):
+def stopper(start,ori_file,CH,actual_errors,error_free,sec_errors):
     if(len(ori_file)==CH):
+        print("sceond " + str(second_errors))
         end = time.time()# now file transfer is over
         resive_data.print_All(str(end - start),actual_errors,error_free)#print results
         resive_data.writer(ori_file)#create a file
@@ -124,14 +129,14 @@ def start():
             list_ack(error_pac_num_list)
             if not None in temp_store:#all packets are ok
                 collector(temp_store,original_file) #add data
-                if(stopper(start,original_file,NUM_OF_CHUNKS,actual_errors,error_free)):#comaire error free packets with how many actual packets
+                if(stopper(start,original_file,NUM_OF_CHUNKS,actual_errors,error_free,second_errors)):#comaire error free packets with how many actual packets
                     break
                 temp_store = list_maker(original_file,NUM_OF_CHUNKS,WINDOW_SIZE)
                  # + Ack
             else:#some pacs lost
-                re_resiver(temp_store,error_pac_num_list)
+                re_resiver(temp_store)
                 collector(temp_store,original_file)
-                if(stopper(start,original_file,NUM_OF_CHUNKS,actual_errors,error_free)):#comaire error free packets with how many actual packets
+                if(stopper(start,original_file,NUM_OF_CHUNKS,actual_errors,error_free,second_errors)):#comaire error free packets with how many actual packets
                     break
                 temp_store = list_maker(original_file,NUM_OF_CHUNKS,WINDOW_SIZE)
             error_pac_num_list = []
@@ -145,5 +150,8 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 
 sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 sock2.bind((UDP_IP, UDP_PORT))
+
+second_errors = 0
+not_sec_errors = 0
 
 start()

@@ -9,7 +9,7 @@ UDP_PORT = 5005
 CLIENT_PORT = 5000
 #file info
 CHUNK_SIZE = 100
-WINDOW_SIZE = 5
+WINDOW_SIZE = 1
 SEND_FILE = "myfile.txt" #file name which going to send
 
 #ACKS
